@@ -1,0 +1,46 @@
+version: '2.1'
+services:
+    master:
+        image: sequenceiq/spark:1.6.0
+        hostname: master
+        ports:
+            - "4040:4040"
+            - "8042:8042"
+            - "7077:7077"
+            - "8088:8088"
+            - "8080:8080"
+        restart: always
+        command: bash /usr/local/spark/sbin/start-master.sh && ping localhost > /dev/null
+
+    worker:
+        image: sequenceiq/spark:1.6.0
+        depends_on:
+            - master
+        expose:
+            - "8081"
+        restart: always
+        command: bash /usr/local/spark/sbin/start-slave.sh spark://master:7077 && ping localhost >/dev/null
+
+
+    web:
+        image: puckel/docker-airflow:1.10.2
+        restart: always
+        depends_on:
+            - master
+        environment:
+            - LOAD_EX=n
+            - EXECUTOR=Local
+            - FERNET_KEY='iblMI7bQK1iHc-aLtzHK3ufxLFLN3uie6TSxa4hqXkA='
+        volumes:
+            - ./dags:/usr/local/airflow/dags
+            # Uncomment to include custom plugins
+            - ./plugins:/usr/local/airflow/plugins
+            - ./requirements.txt:/requirements.txt
+        ports:
+            - "8080:8080"
+        command: webserver
+        healthcheck:
+            test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
+            interval: 30s
+            timeout: 30s
+            retries: 3
