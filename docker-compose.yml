@@ -12,6 +12,7 @@ services:
         restart: always
         command: bash /usr/local/spark/sbin/start-master.sh && ping localhost > /dev/null
 
+
     worker:
         image: sequenceiq/spark:1.6.0
         depends_on:
