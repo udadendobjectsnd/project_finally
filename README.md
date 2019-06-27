@@ -6,4 +6,4 @@
     - download data from kaggle 'kaggle datasets download -d berkeleyearth/climate-change-earth-surface-temperature-data -p kaggle-data'
 
 ### sep 3 init spark and airflow by docker:
-    
+    - docker-compose exec in work-dir'docker-compose up -d'
